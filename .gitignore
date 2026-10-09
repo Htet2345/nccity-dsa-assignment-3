@@ -1,0 +1,12 @@
+.tools/
+build/
+accounts.tsv
+accounts.tsv.tmp
+release.json
+
+# Include submission setup and tests even if locally excluded by Git.
+!/.gitignore
+!/.vscode/
+!/scripts/
+!/tests/
+!/LOCAL_SETUP.md

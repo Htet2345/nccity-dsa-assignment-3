@@ -24,7 +24,7 @@ The linked list is suitable for demonstrating dynamic allocation, traversal, ins
 
 ## Design derived from the research
 
-The implementation provides account creation, listing, search, deposits, withdrawals, transfers, and deletion. It checks unique positive account numbers and validates transaction amounts before changing balances. Money is stored in integer cents so decimal amounts do not depend on floating-point rounding. Saving account records to a text file allows the program to restore its state on the next run.
+The implementation provides account creation, listing, search, deposits, withdrawals, transfers, deletion, customer name updates, and transaction history viewing. It checks unique positive account numbers and validates transaction amounts before changing balances. Money is stored in integer cents so decimal amounts do not depend on floating-point rounding. Each account owns a linked list of successful transaction records, including the amount, resulting balance, and the other account number for transfers. Saving accounts and histories to a text file allows the program to restore its state on the next run.
 
 The C program is divided into menu, linked-list, input, and storage modules. This makes each responsibility easier to understand and follows the assignment's requirement to separate code files as needed. [Source: GNU C Reference Manual, program structure](https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html)
 

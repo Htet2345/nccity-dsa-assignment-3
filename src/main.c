@@ -9,6 +9,21 @@ static void display(const Account *account) {
            account->name, account->balance / 100, account->balance % 100);
 }
 
+static void display_history(const Account *account) {
+    const char *types[] = {"Opening balance", "Deposit", "Withdrawal", "Transfer in", "Transfer out"};
+    display(account);
+    if (!account->history) { puts("No recorded transactions for this account."); return; }
+    puts("No.  Transaction          Amount          Balance after   Other account");
+    size_t index = 1;
+    for (const Transaction *entry = account->history; entry; entry = entry->next) {
+        printf("%-4zu %-20s %" PRId64 ".%02" PRId64 "          %" PRId64 ".%02" PRId64,
+               index++, types[entry->type], entry->amount / 100, entry->amount % 100,
+               entry->balance_after / 100, entry->balance_after % 100);
+        if (entry->other_account) printf("          %d", entry->other_account);
+        putchar('\n');
+    }
+}
+
 int main(int argc, char **argv) {
     const char *path = argc > 1 ? argv[1] : "accounts.tsv";
     Account *head = NULL;
@@ -21,10 +36,11 @@ int main(int argc, char **argv) {
     if (!loaded) puts("No saved accounts found. Starting a new bank.");
     for (;;) {
         puts("\n1. Create account\n2. List accounts\n3. Search account\n4. Deposit"
-             "\n5. Withdraw\n6. Transfer\n7. Delete account\n8. Save\n0. Save and exit");
+             "\n5. Withdraw\n6. Transfer\n7. Delete account\n8. Save"
+             "\n9. Update Account Information\n10. View Transaction History\n0. Save and exit");
         int choice, number;
         int64_t amount;
-        if (!input_number("Choice: ", 0, 8, &choice)) break;
+        if (!input_number("Choice: ", 0, 10, &choice)) break;
         if (choice == 0) break;
         if (choice == 8) {
             puts(bank_save(head, path) ? "Accounts saved." : "Save failed. Data remains in memory; retry before exiting.");
@@ -49,7 +65,14 @@ int main(int argc, char **argv) {
         } else {
             if (!account) { puts("Account not found."); continue; }
             if (choice == 3) { display(account); continue; }
-            if (choice == 7) {
+            if (choice == 10) { display_history(account); continue; }
+            if (choice == 9) {
+                char name[NAME_SIZE];
+                display(account);
+                if (!input_line("New customer name: ", name, sizeof name)) break;
+                changed = bank_update(account, name);
+                puts(changed ? "Account information updated." : "Could not update account information.");
+            } else if (choice == 7) {
                 changed = bank_delete(&head, number);
                 puts(changed ? "Account deleted." : "Withdraw or transfer the remaining balance before deletion.");
             } else {
@@ -64,7 +87,7 @@ int main(int argc, char **argv) {
                 if (choice == 4) changed = bank_deposit(account, amount);
                 if (choice == 5) changed = bank_withdraw(account, amount);
                 if (choice == 6) changed = bank_transfer(account, target, amount);
-                puts(changed ? "Transaction completed." : "Transaction refused: insufficient funds or balance limit exceeded.");
+                puts(changed ? "Transaction completed." : "Transaction refused: insufficient funds, balance limit exceeded, or memory unavailable.");
                 display(account);
             }
         }

@@ -12,10 +12,13 @@ bool input_line(const char *prompt, char *buffer, size_t size) {
         if (!fgets(buffer, (int)size, stdin)) return false;
         char *newline = strchr(buffer, '\n');
         if (!newline && !feof(stdin)) {
-            int ch;
-            while ((ch = getchar()) != '\n' && ch != EOF) {}
-            puts("Input is too long. Please try again.");
-            continue;
+            /* A full buffer may still contain a valid maximum-length value. */
+            int ch = getchar();
+            if (ch != '\n' && ch != EOF) {
+                while ((ch = getchar()) != '\n' && ch != EOF) {}
+                puts("Input is too long. Please try again.");
+                continue;
+            }
         }
         buffer[strcspn(buffer, "\r\n")] = '\0';
         size_t start = 0;
